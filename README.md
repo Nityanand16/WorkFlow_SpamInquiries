@@ -31,9 +31,10 @@ It captures form submissions, classifies them using an OpenAI model, and stores 
 
 ## 🏗️ Workflow Architecture
 
-<img width="2924" height="1656" alt="Expense Tracker" src="https://github.com/user-attachments/assets/8386100f-41e5-4157-9a23-2e85bbfc70c8" />
+<img width="3828" height="2014" alt="Spam Inquiries" src="https://github.com/user-attachments/assets/a1631622-9dda-45d9-9fde-747f43b2d444" />
 
 ---
+
 
 ## ⚙️ Workflow Breakdown
 
