@@ -28,16 +28,10 @@ It captures form submissions, classifies them using an OpenAI model, and stores 
 
 ---
 
+
 ## 🏗️ Workflow Architecture
 
-```mermaid
-graph TD
-A[Form Submission] --> B[Validate Message]
-B --> C[OpenAI Spam Detection]
-C --> D{Is Spam?}
-D -->|Yes| E[Store in Spam Sheet]
-D -->|No| F[Store in Genuine Enquiries Sheet]
-```
+<img width="2924" height="1656" alt="Expense Tracker" src="https://github.com/user-attachments/assets/8386100f-41e5-4157-9a23-2e85bbfc70c8" />
 
 ---
 
