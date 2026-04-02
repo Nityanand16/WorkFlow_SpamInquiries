@@ -1,0 +1,347 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": " Project Inquiry",
+        "formDescription": "A form that captures email and message from a potential client",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": " Email",
+              "fieldType": "email",
+              "placeholder": " Enter your email here",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Message",
+              "placeholder": "Enter your project enquiry here"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        -1200,
+        -16
+      ],
+      "id": "778497b3-7e6e-4181-b7fc-9bf24f89dc0d",
+      "name": "On form submission",
+      "webhookId": "8c1d4ea3-0799-467b-9bc3-cb2d3e2fc923"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "048b68b7-935c-4324-bf89-3ee4e07c1cf0",
+              "leftValue": "={{ $json.Message }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        -992,
+        -16
+      ],
+      "id": "13ec3f9c-c276-4f3c-a45c-72a2f69d6541",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a spam filter, you will receive submission from the lead-gen form and you will have to check whether or not the submissions are spam, or legitimate enquiries. The lead-gen form is a project inquiry form for our web development agency\n\nEverything which is not a request or question related to our business should be categorized as spam. If someone says a test message, then it's a spam.\n\nAdditionally, if you detect dummy emails like \"mail@example.org\", this falls under spam bucket\n\nYour task is to respond with a \"yes\" if it is spam, and \"no\" if it is legitimate\n\nDo not explain yourself, do not add any additional text or output, only respond with a single word: \"yes\" (if the submission is spam), \"no\" (if it is legitimate inquiry)"
+            },
+            {
+              "content": "=Email: {{ $json.Email }}\nMessage: {{ $json.Message }}\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.1,
+      "position": [
+        -784,
+        -16
+      ],
+      "id": "c415040e-9737-4c86-96c8-f1d2ff226d8d",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "3sWWYguNtvZjHcHA",
+          "name": "OpenAI account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "6301d4b9-36b1-4f34-ae72-ecf911ec4644",
+              "leftValue": "={{ $json.output[0].content[0].text }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -432,
+        -16
+      ],
+      "id": "4c792c63-e723-4625-ab76-64df32b55534",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4",
+          "mode": "list",
+          "cachedResultName": "Lead Enquiry Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Spam",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('Filter').item.json[' Email'] }}",
+            "Message": "={{ $('Filter').item.json.Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        -112
+      ],
+      "id": "f391b4bd-de50-4f43-a9ef-b819e1c58b87",
+      "name": "Spam",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ySrIrnwONdkIACtX",
+          "name": "Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4",
+          "mode": "list",
+          "cachedResultName": "Lead Enquiry Database",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2039178648,
+          "mode": "list",
+          "cachedResultName": "Genuine Enquiries",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ZRht7DX_f2lEOMCwL7uzuAU9RbzGpFTLPsvJTy64kV4/edit#gid=2039178648"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "email": "={{ $('Filter').item.json[' Email'] }}",
+            "messages": "={{ $('Filter').item.json.Message }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "messages",
+              "displayName": "messages",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -208,
+        80
+      ],
+      "id": "d1853fc8-7494-4a29-bc62-78d10aad5984",
+      "name": "Genuine Enquireis",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ySrIrnwONdkIACtX",
+          "name": "Gmail"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          " Email": "test@example.com",
+          "Message": "I need help building a website",
+          "submittedAt": "2026-04-01T20:57:03.981+02:00",
+          "formMode": "test"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Spam",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Genuine Enquireis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "91bdca6b-0376-4404-8b94-6e55263b68bb",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0343306d76329a21b145dd53a10622f73319baffef272486fee39599722e25bf"
+  },
+  "id": "9IUc1EQUHN1yD1EQ",
+  "tags": []
+}
